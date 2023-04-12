@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Jogo da Forca</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      h1 {
+        text-align: center;
+      }
+
+      #word {
+        font-size: 2em;
+        font-weight: bold;
+        text-align: center;
+        margin: 1em;
+      }
+
+      #tries {
+        font-weight: bold;
+      }
+
+      #used {
+        font-weight: bold;
+      }
+
+      input[type="text"] {
+        font-size: 1.5em;
+        margin-right: 0.5em;
+        padding: 0.5em;
+      }
+
+      button {
+        font-size: 1.5em;
+        padding: 0.5em;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Jogo da Forca</h1>
+    <p>Adivinhe a palavra:</p>
+    <div id="word"></div>
+    <p>Tentativas restantes: <span id="tries"></span></p>
+    <p>Letras já usadas: <span id="used"></span></p>
+    <input type="text" id="guess" placeholder="Digite uma letra" />
+    <button id="submit">Tentar</button>
+    <script src="script.js"></script>
+  </body>
+  <script>
+    const words = [
+      "interface",
+      "estrutura",
+      "desenvolvimento",
+      "programacao",
+      "software",
+      "dependabilidade",
+      "UX",
+      "AWS",
+    ];
+
+    const maxTries = 6;
+    let currentWord = "";
+    let remainingTries = 0;
+    let usedLetters = [];
+    let wordState = [];
+
+    function newGame() {
+      // Escolhe uma palavra aleatória
+      currentWord = words[Math.floor(Math.random() * words.length)];
+
+      // Reinicia as variáveis do jogo
+      remainingTries = maxTries;
+      usedLetters = [];
+      wordState = Array(currentWord.length).fill("_");
+
+      // Atualiza a interface
+      updateWordState();
+      updateTries();
+      updateUsedLetters();
+    }
+
+    function guessLetter(letter) {
+      // Verifica se a letra já foi usada
+      if (usedLetters.includes(letter)) {
+        alert("Essa letra já foi usada!");
+        return;
+      }
+
+      // Adiciona a letra às letras usadas
+      usedLetters.push(letter);
+
+      // Verifica se a letra está na palavra
+      let found = false;
+      for (let i = 0; i < currentWord.length; i++) {
+        if (currentWord[i] === letter) {
+          wordState[i] = letter;
+          found = true;
+        }
+      }
+
+      // Verifica se o jogo acabou
+      if (!found) {
+        remainingTries--;
+        if (remainingTries === 0) {
+          alert("Você perdeu! A palavra era " + currentWord);
+          newGame();
+          return;
+        }
+      } else if (wordState.join("") === currentWord) {
+        alert("Você ganhou!");
+        newGame();
+        return;
+      }
+
+      // Atualiza a interface
+      updateWordState();
+      updateTries();
+      updateUsedLetters();
+    }
+
+    function updateWordState() {
+      const wordEl = document.getElementById("word");
+      wordEl.innerText = wordState.join(" ");
+    }
+
+    function updateTries() {
+      const triesEl = document.getElementById("tries");
+      triesEl.innerText = remainingTries;
+    }
+
+    function updateUsedLetters() {
+      const usedEl = document.getElementById("used");
+      usedEl.innerText = usedLetters.join(", ");
+    }
+
+    // Inicia um novo jogo ao carregar a página
+    window.onload = newGame;
+
+    // Adiciona um event listener para o botão "Tentar"
+    const submitBtn = document.getElementById("submit");
+    submitBtn.addEventListener("click", () => {
+      const guessEl = document.getElementById("guess");
+      const guess = guessEl.value.toLowerCase();
+      guessEl.value = "";
+      guessLetter(guess);
+    });
+
+    // Adiciona um event listener para a tecla "Enter"
+    document.addEventListener("keydown", (event) => {
+      if (event.key.length === 1 && event.key.match(/[a-z]/i)) {
+        guessLetter(event.key.toLowerCase());
+      }
+    });
+  </script>
+</html>
